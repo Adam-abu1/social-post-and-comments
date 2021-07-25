@@ -31,30 +31,80 @@ async function compileData() {
         return response.data;
     });
 
-    const names = []
-
-    names.push(users.map(user => {
-        const result = {};
-        const userName = user['name'];
-
-        user[userName] = {
-            post: posts.filter(post => {
+    return posts.map(post => {
+        return {
+            id: post['id'],
+            content: post['body'],
+            created_at: post['created_at'],
+            user: users.find(user => {
                 return post.user_id === user.id
             }),
             comments: comments.filter(comment => {
-                return comment.user_id === user.id
+                return comment.post_id === post.id
             })
-        };
-
-        result[userName] = user[userName];
-
-        return result;
-    }));
-
-    return names
+        }
+    });
 }
 
-compileData().then(response => {
-    console.log(response)
-})
+/**
+ * Creates a Date object then takes the necessary data out and formats it according to wireframe
+ *
+ * @param timestamp
+ * @return {string}
+ */
+function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    const formattedDate =  date.getFullYear() + '-' + date.getMonth() + '-' + date.getDay();
+    const formattedTime = date.getHours() + ':' + date.getMinutes();
 
+    return formattedDate + ' ' + formattedTime;
+}
+
+async function buildElements() {
+    let posts = await compileData().then(response => {
+        return response;
+    });
+
+    posts.forEach(post => {
+        const postList = document.getElementById('postList');
+
+        const postData = document.createElement('li'),
+            userName = document.createElement('span'),
+            postDate = document.createElement('span'),
+            postContent = document.createElement('div');
+
+        userName.innerText = post?.user?.name;
+        userName.className = 'user-name'
+
+        postDate.innerText = formatDate(post?.created_at);
+        postDate.className = 'post-date';
+
+        postContent.innerText = post.content;
+        postContent.className = 'post-content';
+
+
+        postData.className = 'post-data';
+        postData.appendChild(userName);
+        postData.appendChild(postDate);
+        postData.appendChild(postContent);
+
+        // Check if comments exist then display the number of comments
+        if (post.comments.length) {
+            const commentsData = document.createElement('ul'),
+                commentsDatum = document.createElement('li');
+
+            commentsDatum.innerText = `Show ${post.comments.length}` + (post.comments.length > 1 ? ' replies' : ' reply');
+            commentsDatum.className = 'show-comments';
+            commentsData.appendChild(commentsDatum);
+            postData.appendChild(commentsData);
+        }
+
+        postList.appendChild(postData);
+    });
+}
+
+function showComments(posts) {
+
+}
+
+buildElements();
