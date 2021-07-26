@@ -1,6 +1,6 @@
 body {
     font-family: 'Helvetica', 'Arial', sans-serif;
-
+    margin: 3vh 3vw;
 }
 
 li {
@@ -8,8 +8,12 @@ li {
     margin: 1em 0;
 }
 
-.user-name {
+.user-name, .commenter-name {
     font-weight: bold;
+}
+
+.post-content, .comment-content {
+    margin-top: 0.5em;
 }
 
 span {

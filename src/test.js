@@ -32,6 +32,14 @@ async function compileData() {
     });
 
     return posts.map(post => {
+        const filterComments = comments.filter(comment => {
+            return comment.post_id === post.id
+        });
+
+        filterComments.forEach(comment => {
+            comment['user'] = users.find(user => comment.user_id === user.id)['name'];
+        });
+
         return {
             id: post['id'],
             content: post['body'],
@@ -39,9 +47,7 @@ async function compileData() {
             user: users.find(user => {
                 return post.user_id === user.id
             }),
-            comments: comments.filter(comment => {
-                return comment.post_id === post.id
-            })
+            comments: filterComments
         }
     });
 }
@@ -94,8 +100,16 @@ async function buildElements() {
                 commentsDatum = document.createElement('li');
 
             commentsDatum.innerText = `Show ${post.comments.length}` + (post.comments.length > 1 ? ' replies' : ' reply');
-            commentsDatum.className = 'show-comments';
-            commentsData.appendChild(commentsDatum);
+            commentsDatum.classList.add('show-comments');
+            commentsData.classList.add(`post-${post.id}-comments`);
+            commentsDatum.addEventListener('click',function() {
+                commentsDatum.innerText = `Hide ${post.comments.length}` + (post.comments.length > 1 ? ' replies' : ' reply');
+                commentsDatum.addEventListener('click',function() {
+                    hideComments(post)
+                });
+                showComments(post);
+            });
+            postData.appendChild(commentsDatum);
             postData.appendChild(commentsData);
         }
 
@@ -103,7 +117,34 @@ async function buildElements() {
     });
 }
 
-function showComments(posts) {
+async function showComments(post) {
+    const showCommentsLink = await document.getElementsByClassName(`post-${post['id']}-comments`);
+
+    post.comments.forEach(comment => {
+        const commentDatum = document.createElement('li'),
+            userName = document.createElement('span'),
+            commentDate = document.createElement('span'),
+            commentContent = document.createElement('div');
+
+        userName.innerText = comment?.user;
+        userName.className = 'commenter-name';
+
+        commentDate.innerText = formatDate(comment?.created_at);
+        commentDate.className = 'comment-date';
+
+        commentContent.innerText = comment.body;
+        commentContent.className = 'comment-content';
+
+        commentDatum.className = 'comment-datum';
+        commentDatum.appendChild(userName);
+        commentDatum.appendChild(commentDate);
+        commentDatum.appendChild(commentContent);
+
+        showCommentsLink[0].appendChild(commentDatum);
+    });
+}
+
+function buildSocialPost() {
 
 }
 
