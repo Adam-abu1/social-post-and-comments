@@ -18,6 +18,12 @@ const getUsers = () => new Promise((resolve) => setTimeout(() => {
             .then(response => response.json()))
 }, generateDelayTime()));
 
+/**
+ *  Pulls json data and from 3 separate sources and compiles and relates the necessary data to each other in a single object
+ *  then returns them in a promise.
+ *
+ * @return {Promise<*>}
+ */
 async function compileData() {
     let users = await getUsers().then(response => {
         return response.data;
@@ -60,12 +66,19 @@ async function compileData() {
  */
 function formatDate(timestamp) {
     const date = new Date(timestamp);
-    const formattedDate =  date.getFullYear() + '-' + date.getMonth() + '-' + date.getDay();
+    const month = date.getMonth();
+    const day = date.getDay();
+    const formattedDate =  date.getFullYear() + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day) ;
     const formattedTime = date.getHours() + ':' + date.getMinutes();
 
     return formattedDate + ' ' + formattedTime;
 }
 
+/**
+ * Pulls the data and creates the social media page with post and comments by dynamically building the html
+ *
+ * @return {Promise<void>}
+ */
 async function buildElements() {
     let posts = await compileData().then(response => {
         return response;
@@ -94,21 +107,30 @@ async function buildElements() {
         postData.appendChild(postDate);
         postData.appendChild(postContent);
 
+        post['displayComments'] = true;
         // Check if comments exist then display the number of comments
         if (post.comments.length) {
             const commentsData = document.createElement('ul'),
                 commentsDatum = document.createElement('li');
 
-            commentsDatum.innerText = `Show ${post.comments.length}` + (post.comments.length > 1 ? ' replies' : ' reply');
+            const numOfReplies = `${post.comments.length}` + (post.comments.length > 1 ? ' replies' : ' reply')
+            commentsDatum.innerText = `Show ${numOfReplies}`;
             commentsDatum.classList.add('show-comments');
             commentsData.classList.add(`post-${post.id}-comments`);
+            commentsData.style.display = 'none';
+            showComments(post);
             commentsDatum.addEventListener('click',function() {
-                commentsDatum.innerText = `Hide ${post.comments.length}` + (post.comments.length > 1 ? ' replies' : ' reply');
-                commentsDatum.addEventListener('click',function() {
-                    hideComments(post)
-                });
-                showComments(post);
+                if (post['displayComments']) {
+                    post['displayComments'] = false;
+                    commentsData.style.display = 'block';
+                    commentsDatum.innerText = `Hide ${numOfReplies}`;
+                } else {
+                    post['displayComments'] = true;
+                    commentsData.style.display = 'none';
+                    commentsDatum.innerText = `Show ${numOfReplies}`;
+                }
             });
+
             postData.appendChild(commentsDatum);
             postData.appendChild(commentsData);
         }
@@ -142,10 +164,6 @@ async function showComments(post) {
 
         showCommentsLink[0].appendChild(commentDatum);
     });
-}
-
-function buildSocialPost() {
-
 }
 
 buildElements();
