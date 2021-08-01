@@ -15,7 +15,6 @@ __Note!__ _The delay between calling API and
 receiving an answer is random, meaning you cannot assume that calls will respond in the same order they were called. This is to simulate
 variance in response time of real server requests._
 
-All API mocks can be found in [this file.](./src/data/index.js)
 
 ## Your task
 - Display the list of posts with their authors and number of comments

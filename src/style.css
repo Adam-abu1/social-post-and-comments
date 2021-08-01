@@ -5,7 +5,7 @@ body {
 
 li {
     list-style: none;
-    margin: 1em 0;
+    margin: 2em 0;
 }
 
 .user-name, .commenter-name {
@@ -22,4 +22,5 @@ span {
 
 .show-comments {
     color: #0cb4b4;
+    cursor: pointer;
 }
